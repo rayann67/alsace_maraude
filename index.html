@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alsace Maraude – Demo App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #1a0a0a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0; overflow-x: hidden; }
+
+  /* NAV */
+  .site-nav { width: 100%; background: #0f0505; border-bottom: 1px solid #3a1010; padding: 10px 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { display: flex; align-items: center; gap: 12px; }
+  .nav-logo-wrap { width: 44px; height: 44px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .nav-brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .brand-main { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; letter-spacing: 0.5px; }
+  .brand-sub { font-size: 10px; color: #c8312a; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: #bbb; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+
+  /* HERO */
+  .hero { width: 100%; padding: 80px 40px 60px; text-align: center; background: linear-gradient(180deg, #0f0505 0%, #1a0a0a 100%); }
+  .hero-tag { display: inline-block; background: #2a0808; color: #c8312a; border: 1px solid #4a1515; border-radius: 20px; font-size: 12px; font-weight: 600; padding: 5px 14px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(36px,5vw,64px); color: #fff; line-height: 1.15; margin-bottom: 20px; }
+  .hero h1 em { color: #c8312a; font-style: normal; }
+  .hero p { color: #999; font-size: 17px; max-width: 520px; margin: 0 auto 40px; line-height: 1.7; }
+  .hero-cta { background: #c8312a; color: #fff; font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 8px; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .hero-cta:hover { background: #e03a32; }
+
+  /* PHONE SECTION */
+  .phone-section { width: 100%; max-width: 1200px; padding: 60px 40px 80px; display: flex; align-items: flex-start; justify-content: center; gap: 60px; }
+  .phone-wrapper { position: relative; flex-shrink: 0; }
+  .phone-frame { width: 320px; height: 640px; background: #111; border-radius: 44px; border: 3px solid #333; position: relative; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08); }
+  .phone-frame::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #111; border-radius: 0 0 20px 20px; z-index: 10; }
+  .phone-screen { width: 100%; height: 100%; overflow: hidden; border-radius: 41px; position: relative; background: #fff; }
+
+  /* PAGES */
+  .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease; transform: translateX(30px); }
+  .page.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+  .page.exit { opacity: 0; transform: translateX(-30px); }
+
+  /* APP HEADER */
+  .app-header { background: #c8312a; padding: 36px 16px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .header-title { color: #fff; font-weight: 700; font-size: 15px; letter-spacing: 0.3px; }
+  .header-logo { width: 38px; height: 38px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .logo-svg { width: 32px; height: 32px; }
+  .back-btn { background: rgba(255,255,255,0.18); border: none; color: #fff; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
+  .back-btn:hover { background: rgba(255,255,255,0.28); }
+
+  /* PAGE 1 – LANGUE */
+  #page-langue .app-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 20px 24px; background: #fafafa; }
+  .langue-logo-block { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+  .langue-asso-name { font-size: 14px; font-weight: 800; color: #111; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .langue-logo-circle { width: 76px; height: 76px; background: #fff; border-radius: 50%; border: 2px solid #e8e8e8; display: flex; align-items: center; justify-content: center; }
+  #page-langue .lang-title { font-size: 14px; font-weight: 600; color: #444; margin-bottom: 14px; text-align: center; }
+  .lang-option { width: 100%; background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 9px; transition: border-color 0.2s, background 0.15s; }
+  .lang-option:hover { border-color: #c8312a; background: #fff8f8; }
+  .lang-flag { font-size: 24px; line-height: 1; }
+  .lang-name { font-weight: 600; font-size: 13px; color: #222; }
+  .lang-native { font-size: 10px; color: #888; }
+  .lang-check { margin-left: auto; width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .lang-option.selected .lang-check { background: #c8312a; border-color: #c8312a; }
+  .lang-option.selected .lang-check::after { content: ''; width: 7px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); display: block; }
+  .lang-option.selected { border-color: #c8312a; background: #fff8f8; }
+
+  /* PAGE 2 – LOGIN */
+  #page-login .app-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; background: #fafafa; }
+  .login-icon { width: 56px; height: 56px; background: #fde8e8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 26px; }
+  .login-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; text-align: center; }
+  .input-group { width: 100%; margin-bottom: 12px; }
+  .input-label { font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; display: block; letter-spacing: 0.5px; text-transform: uppercase; }
+  .app-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e5e5e5; border-radius: 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #222; background: #fff; transition: border-color 0.2s; outline: none; }
+  .app-input:focus { border-color: #c8312a; }
+  .app-input::placeholder { color: #bbb; }
+  .btn-login { width: 100%; background: #c8312a; color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+  .btn-login:hover { background: #e03a32; }
+  .forgot-link { font-size: 11px; color: #c8312a; text-align: center; margin-top: 10px; cursor: pointer; }
+  .lang-display { display: none; width: 100%; }
+  .lang-display.active { display: block; }
+
+  /* PAGE 3 – HOME */
+  #page-home .app-body { flex: 1; overflow-y: auto; background: #f5f5f5; padding: 14px; }
+  .welcome-banner { background: linear-gradient(135deg, #c8312a, #8b1a16); border-radius: 14px; padding: 16px; margin-bottom: 14px; color: #fff; }
+  .wb-label { font-size: 10px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+  .wb-name { font-size: 18px; font-weight: 700; }
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .home-card { background: #fff; border-radius: 14px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border: 1.5px solid #eee; }
+  .home-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+  .home-card.clickable:hover { border-color: #c8312a; }
+  .home-card-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+  .home-card-label { font-size: 11px; font-weight: 600; color: #333; line-height: 1.3; }
+
+  /* PAGE 4 – MES BESOINS */
+  #page-besoins .app-body { flex: 1; overflow-y: auto; background: #f5f5f5; padding: 12px; }
+  .besoins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .besoin-card { background: #fff; border-radius: 12px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1.5px solid #eee; }
+  .besoin-card:hover { border-color: #c8312a; box-shadow: 0 4px 16px rgba(200,49,42,0.13); }
+  .besoin-card.highlight { border-color: #c8312a; background: #fff8f8; }
+  .besoin-card.ripple-anim { animation: ripplePulse 0.4s ease; }
+  @keyframes ripplePulse { 0%{transform:scale(1)} 40%{transform:scale(0.93)} 70%{transform:scale(1.05)} 100%{transform:scale(1)} }
+  .besoin-icon { font-size: 26px; margin-bottom: 6px; }
+  .besoin-label { font-size: 10px; font-weight: 600; color: #333; line-height: 1.3; }
+
+  /* PAGES 5 & 6 */
+  #page-femmes .app-body, #page-educ .app-body { flex: 1; overflow-y: auto; background: #f5f5f5; padding: 12px; }
+  .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .item-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid #eee; cursor: pointer; transition: transform 0.15s; }
+  .item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+  .item-img { width: 100%; height: 76px; display: flex; align-items: center; justify-content: center; font-size: 36px; background: #f8f0f0; }
+  .item-info { padding: 8px 10px 10px; }
+  .item-name { font-size: 11px; font-weight: 600; color: #222; margin-bottom: 2px; }
+  .item-avail { font-size: 10px; color: #2a9e5a; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+  .item-avail::before { content: '●'; font-size: 7px; }
+  .item-avail.limited { color: #c8750a; }
+  .btn-request { width: 100%; background: #c8312a; color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+  .btn-request:hover { background: #e03a32; }
+
+  /* SIDE INFO */
+  .side-info { flex: 1; max-width: 400px; padding-top: 20px; }
+  .side-info h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; margin-bottom: 16px; line-height: 1.3; }
+  .side-info h2 em { color: #c8312a; font-style: normal; }
+  .side-info p { color: #aaa; font-size: 15px; line-height: 1.7; margin-bottom: 24px; }
+  .page-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c8312a; margin-bottom: 8px; }
+  .page-dots { display: flex; gap: 10px; align-items: center; margin-bottom: 24px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #444; cursor: pointer; transition: all 0.2s; }
+  .dot.active { background: #c8312a; width: 24px; border-radius: 4px; }
+  .page-nav-btns { display: flex; gap: 10px; }
+  .nav-btn { background: #2a0808; border: 1px solid #4a1515; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s; }
+  .nav-btn:hover { background: #3a1010; }
+  .nav-btn.primary { background: #c8312a; border-color: #c8312a; }
+  .nav-btn.primary:hover { background: #e03a32; }
+
+  .app-body::-webkit-scrollbar { width: 3px; }
+  .app-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .phone-section { flex-direction: column; align-items: center; padding: 30px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 50px 20px 40px; }
+    .site-nav { padding: 10px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-brand">
+    <div class="nav-logo-wrap">
+      <svg width="40" height="40" viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+        <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+        <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+        <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+        <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+        <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+        <circle cx="30" cy="30" r="2" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text">
+      <span class="brand-main">Maraude Connect</span>
+      <span class="brand-sub">Alsace Maraude · Aide aux sans-abris</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#">Accueil</a>
+    <a href="#">Fonctionnalités</a>
+    <a href="#">Contact</a>
+    <a href="#">WordPress</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">Application Mobile · Demo</div>
+  <h1>Alsace Maraude<br><em>Aide aux sans-abris</em></h1>
+  <p>Une application solidaire qui connecte les bénévoles et les personnes dans le besoin. Plus de solidarité, moins de précarité.</p>
+  <button class="hero-cta" onclick="document.querySelector('.phone-section').scrollIntoView({behavior:'smooth'})">Voir la démo ↓</button>
+</section>
+
+<section class="phone-section">
+  <div class="side-info">
+    <div class="page-label" id="side-label">Page 1 / 6 — Choix de langue</div>
+    <h2 id="side-title">Choisissez votre <em>langue</em></h2>
+    <p id="side-desc">L'application s'adapte automatiquement à la langue choisie pour guider chaque utilisateur dans sa langue maternelle.</p>
+    <div class="page-dots">
+      <div class="dot active" onclick="goTo(0)"></div>
+      <div class="dot" onclick="goTo(1)"></div>
+      <div class="dot" onclick="goTo(2)"></div>
+      <div class="dot" onclick="goTo(3)"></div>
+      <div class="dot" onclick="goTo(4)"></div>
+      <div class="dot" onclick="goTo(5)"></div>
+    </div>
+    <div class="page-nav-btns">
+      <button class="nav-btn" onclick="prevPage()">← Préc.</button>
+      <button class="nav-btn primary" onclick="nextPage()">Suivant →</button>
+    </div>
+  </div>
+
+  <div class="phone-wrapper">
+    <div class="phone-frame">
+      <div class="phone-screen">
+
+        <!-- PAGE 1 : LANGUE -->
+        <div class="page active" id="page-langue">
+          <div class="app-header">
+            <span class="header-title">Maraude Connect</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="langue-logo-block">
+              <div class="langue-asso-name">Alsace Maraude</div>
+              <div class="langue-logo-circle">
+                <svg width="68" height="68" viewBox="0 0 60 60" fill="none">
+                  <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                  <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                  <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                  <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                  <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                  <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                  <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                  <circle cx="30" cy="30" r="2" fill="#fff"/>
+                </svg>
+              </div>
+            </div>
+            <p class="lang-title">Choisir sa langue</p>
+            <div class="lang-option selected" onclick="selectLang(this,'fr'); goTo(1)" data-lang="fr">
+              <span class="lang-flag">🇫🇷</span>
+              <div><div class="lang-name">Français</div><div class="lang-native">French</div></div>
+              <div class="lang-check"></div>
+            </div>
+            <div class="lang-option" onclick="selectLang(this,'de'); goTo(1)" data-lang="de">
+              <span class="lang-flag">🇩🇪</span>
+              <div><div class="lang-name">Deutsch</div><div class="lang-native">German</div></div>
+              <div class="lang-check"></div>
+            </div>
+            <div class="lang-option" onclick="selectLang(this,'en'); goTo(1)" data-lang="en">
+              <span class="lang-flag">🇬🇧</span>
+              <div><div class="lang-name">English</div><div class="lang-native">Anglais</div></div>
+              <div class="lang-check"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 2 : LOGIN -->
+        <div class="page" id="page-login">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(0)">←</button>
+            <span class="header-title" id="login-header-title">Identification</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="login-icon">🔐</div>
+            <div class="lang-display active" data-for-lang="fr">
+              <p class="login-title">Veuillez vous identifier</p>
+              <div class="input-group"><label class="input-label">Identifiant</label><input class="app-input" type="text" placeholder="Votre identifiant"></div>
+              <div class="input-group"><label class="input-label">Mot de passe</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Se connecter</button>
+              <div class="forgot-link">Mot de passe oublié ?</div>
+            </div>
+            <div class="lang-display" data-for-lang="de">
+              <p class="login-title">Bitte identifizieren Sie sich</p>
+              <div class="input-group"><label class="input-label">Benutzername</label><input class="app-input" type="text" placeholder="Ihr Benutzername"></div>
+              <div class="input-group"><label class="input-label">Passwort</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Anmelden</button>
+              <div class="forgot-link">Passwort vergessen?</div>
+            </div>
+            <div class="lang-display" data-for-lang="en">
+              <p class="login-title">Please sign in</p>
+              <div class="input-group"><label class="input-label">Username</label><input class="app-input" type="text" placeholder="Your username"></div>
+              <div class="input-group"><label class="input-label">Password</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Sign in</button>
+              <div class="forgot-link">Forgot password?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 3 : HOME -->
+        <div class="page" id="page-home">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(1)">←</button>
+            <span class="header-title" id="home-header-title">Bienvenue</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="welcome-banner">
+              <div class="wb-label">Alsace Maraude</div>
+              <div class="wb-name" id="welcome-greeting">Bonjour 👋</div>
+              <div style="font-size:11px;opacity:0.75;margin-top:3px;" id="welcome-sub">Que souhaitez-vous faire ?</div>
+            </div>
+            <div class="home-grid">
+              <div class="home-card clickable" onclick="goTo(3)">
+                <div class="home-card-icon" style="background:#fde8e8;">🙏</div>
+                <div class="home-card-label" id="hc-besoins">Mes besoins</div>
+              </div>
+              <div class="home-card">
+                <div class="home-card-icon" style="background:#e8f0fd;">ℹ️</div>
+                <div class="home-card-label" id="hc-infos">Infos utiles</div>
+              </div>
+              <div class="home-card">
+                <div class="home-card-icon" style="background:#e8fde8;">📞</div>
+                <div class="home-card-label" id="hc-contact">Nous contacter</div>
+              </div>
+              <div class="home-card">
+                <div class="home-card-icon" style="background:#fdfde8;">💬</div>
+                <div class="home-card-label" id="hc-msg">Messagerie</div>
+              </div>
+              <div class="home-card" style="grid-column:1/-1;">
+                <div class="home-card-icon" style="background:#fde8f5;">📦</div>
+                <div class="home-card-label" id="hc-box">Ouvrir mon box</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 4 : MES BESOINS -->
+        <div class="page" id="page-besoins">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(2)">←</button>
+            <span class="header-title" id="besoins-header-title">Mes besoins</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="besoins-grid">
+              <div class="besoin-card"><div class="besoin-icon">👔</div><div class="besoin-label" data-i18n="b-hommes">Vêtements hommes</div></div>
+              <div class="besoin-card highlight" onclick="animateFemmes(this)" id="card-femmes"><div class="besoin-icon">👗</div><div class="besoin-label" data-i18n="b-femmes">Vêtements femmes</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🧒</div><div class="besoin-label" data-i18n="b-enfants">Vêtements enfants</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🥫</div><div class="besoin-label" data-i18n="b-aliment">Aliment</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🧹</div><div class="besoin-label" data-i18n="b-menagers">Produits ménagers</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🚿</div><div class="besoin-label" data-i18n="b-hygiene">Toilette & hygiène</div></div>
+              <div class="besoin-card" onclick="animateEduc(this)"><div class="besoin-icon">📚</div><div class="besoin-label" data-i18n="b-educ">Éducation / Culture</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🍲</div><div class="besoin-label" data-i18n="b-nourriture">Nourriture</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🩹</div><div class="besoin-label" data-i18n="b-soin">Trousse de soin</div></div>
+              <div class="besoin-card"><div class="besoin-icon">🛏️</div><div class="besoin-label" data-i18n="b-couvertures">Couvertures</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 5 : VETEMENTS FEMMES -->
+        <div class="page" id="page-femmes">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="femmes-header-title">Vêtements femmes</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">🩲</div><div class="item-info"><div class="item-name" data-i18n="f-sous">Sous-vêtements</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">👕</div><div class="item-info"><div class="item-name" data-i18n="f-tshirt">Tee-shirt</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧶</div><div class="item-info"><div class="item-name" data-i18n="f-pull">Pull</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧦</div><div class="item-info"><div class="item-name" data-i18n="f-chaussettes">Chaussettes</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🌙</div><div class="item-info"><div class="item-name" data-i18n="f-pyjama">Pyjama</div><div class="item-avail limited" data-i18n="limited">Limité</div></div></div>
+              <div class="item-card"><div class="item-img">👠</div><div class="item-info"><div class="item-name" data-i18n="f-chaussures">Chaussures</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧥</div><div class="item-info"><div class="item-name" data-i18n="f-blouson">Blouson / Manteau</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">👖</div><div class="item-info"><div class="item-name" data-i18n="f-pantalon">Pantalon</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1;"><div class="item-img">👗</div><div class="item-info"><div class="item-name" data-i18n="f-robe">Robe / Jupe</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="femmes-btn">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- PAGE 6 : EDUCATION / CULTURE -->
+        <div class="page" id="page-educ">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="educ-header-title">Éducation / Culture</span>
+            <div class="header-logo">
+              <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/>
+                <circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/>
+                <polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/>
+                <polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/>
+                <polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="4" fill="#c8312a"/>
+                <circle cx="30" cy="30" r="2" fill="#fff"/>
+              </svg>
+            </div>
+          </div>
+          <div class="app-body" style="padding-top:14px;">
+            <div class="items-grid">
+              <div class="item-card" style="grid-column:1/-1;"><div class="item-img" style="height:100px;font-size:48px;">📚</div><div class="item-info"><div class="item-name" data-i18n="e-livres">Livres / BD</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1;"><div class="item-img" style="height:100px;font-size:48px;">✏️</div><div class="item-info"><div class="item-name" data-i18n="e-scolaire">Affaires scolaires</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1;"><div class="item-img" style="height:100px;font-size:48px;">🎲</div><div class="item-info"><div class="item-name" data-i18n="e-jeux">Jeux de société</div><div class="item-avail limited" data-i18n="limited">Limité</div></div></div>
+            </div>
+            <button class="btn-request" id="educ-btn">Faire une demande</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  let currentPage = 0;
+  let currentLang = 'fr';
+
+  const pages = ['page-langue','page-login','page-home','page-besoins','page-femmes','page-educ'];
+  const sideData = [
+    { label:'Page 1 / 6 — Choix de langue', title:'Choisissez votre <em>langue</em>', desc:"L'application s'adapte automatiquement à la langue choisie pour guider chaque utilisateur dans sa langue maternelle." },
+    { label:'Page 2 / 6 — Connexion', title:'Identifiez-<em>vous</em>', desc:"Connexion sécurisée avec identifiant et mot de passe. Interface traduite selon la langue sélectionnée." },
+    { label:'Page 3 / 6 — Accueil', title:'Menu <em>principal</em>', desc:"Accès rapide à toutes les fonctionnalités : besoins, infos, messagerie, et gestion du box personnel." },
+    { label:'Page 4 / 6 — Mes Besoins', title:'Catégories de <em>besoins</em>', desc:"10 catégories disponibles. Cliquez sur « Vêtements femmes » ou « Éducation / Culture » pour explorer." },
+    { label:'Page 5 / 6 — Vêtements Femmes', title:'Sélection de <em>vêtements</em>', desc:"9 types de vêtements traduits selon la langue. Faites une demande directement depuis l'application." },
+    { label:'Page 6 / 6 — Éducation / Culture', title:'Culture & <em>savoirs</em>', desc:"Livres, BD, affaires scolaires et jeux de société — pour accompagner chacun dans son épanouissement." },
+  ];
+
+  const translations = {
+    fr: {
+      'login-header':'Identification','home-header':'Bienvenue','welcome-greeting':'Bonjour 👋','welcome-sub':'Que souhaitez-vous faire ?',
+      'hc-besoins':'Mes besoins','hc-infos':'Infos utiles','hc-contact':'Nous contacter','hc-msg':'Messagerie','hc-box':'Ouvrir mon box',
+      'besoins-header':'Mes besoins','b-hommes':'Vêtements hommes','b-femmes':'Vêtements femmes','b-enfants':'Vêtements enfants',
+      'b-aliment':'Aliment','b-menagers':'Produits ménagers','b-hygiene':'Toilette & hygiène','b-educ':'Éducation / Culture',
+      'b-nourriture':'Nourriture','b-soin':'Trousse de soin','b-couvertures':'Couvertures',
+      'femmes-header':'Vêtements femmes','f-sous':'Sous-vêtements','f-tshirt':'Tee-shirt','f-pull':'Pull','f-chaussettes':'Chaussettes',
+      'f-pyjama':'Pyjama','f-chaussures':'Chaussures','f-blouson':'Blouson / Manteau','f-pantalon':'Pantalon','f-robe':'Robe / Jupe',
+      'femmes-btn':'Faire une demande','educ-header':'Éducation / Culture',
+      'e-livres':'Livres / BD','e-scolaire':'Affaires scolaires','e-jeux':'Jeux de société','educ-btn':'Faire une demande',
+      'avail':'Disponible','limited':'Limité'
+    },
+    de: {
+      'login-header':'Anmeldung','home-header':'Willkommen','welcome-greeting':'Hallo 👋','welcome-sub':'Was möchten Sie tun?',
+      'hc-besoins':'Mein Bedarf','hc-infos':'Nützliche Infos','hc-contact':'Kontakt','hc-msg':'Nachrichten','hc-box':'Mein Box öffnen',
+      'besoins-header':'Mein Bedarf','b-hommes':'Herrenkleidung','b-femmes':'Damenkleidung','b-enfants':'Kinderkleidung',
+      'b-aliment':'Lebensmittel','b-menagers':'Haushaltsprodukte','b-hygiene':'Körperpflege','b-educ':'Bildung / Kultur',
+      'b-nourriture':'Nahrung','b-soin':'Erste-Hilfe-Set','b-couvertures':'Decken',
+      'femmes-header':'Damenkleidung','f-sous':'Unterwäsche','f-tshirt':'T-Shirt','f-pull':'Pullover','f-chaussettes':'Socken',
+      'f-pyjama':'Schlafanzug','f-chaussures':'Schuhe','f-blouson':'Jacke / Mantel','f-pantalon':'Hose','f-robe':'Kleid / Rock',
+      'femmes-btn':'Anfrage stellen','educ-header':'Bildung / Kultur',
+      'e-livres':'Bücher / Comics','e-scolaire':'Schulmaterial','e-jeux':'Brettspiele','educ-btn':'Anfrage stellen',
+      'avail':'Verfügbar','limited':'Begrenzt'
+    },
+    en: {
+      'login-header':'Sign In','home-header':'Welcome','welcome-greeting':'Hello 👋','welcome-sub':'What would you like to do?',
+      'hc-besoins':'My needs','hc-infos':'Useful info','hc-contact':'Contact us','hc-msg':'Messaging','hc-box':'Open my box',
+      'besoins-header':'My needs','b-hommes':"Men's clothing",'b-femmes':"Women's clothing",'b-enfants':"Children's clothing",
+      'b-aliment':'Food supplies','b-menagers':'Household products','b-hygiene':'Hygiene & toiletries','b-educ':'Education / Culture',
+      'b-nourriture':'Food','b-soin':'First aid kit','b-couvertures':'Blankets',
+      'femmes-header':"Women's clothing",'f-sous':'Underwear','f-tshirt':'T-shirt','f-pull':'Sweater','f-chaussettes':'Socks',
+      'f-pyjama':'Pyjamas','f-chaussures':'Shoes','f-blouson':'Jacket / Coat','f-pantalon':'Trousers','f-robe':'Dress / Skirt',
+      'femmes-btn':'Make a request','educ-header':'Education / Culture',
+      'e-livres':'Books / Comics','e-scolaire':'School supplies','e-jeux':'Board games','educ-btn':'Make a request',
+      'avail':'Available','limited':'Limited'
+    }
+  };
+
+  function applyTranslations(lang) {
+    const tr = translations[lang];
+    const ids = {
+      'login-header-title':'login-header','home-header-title':'home-header','welcome-greeting':'welcome-greeting',
+      'welcome-sub':'welcome-sub','hc-besoins':'hc-besoins','hc-infos':'hc-infos','hc-contact':'hc-contact',
+      'hc-msg':'hc-msg','hc-box':'hc-box','besoins-header-title':'besoins-header','femmes-header-title':'femmes-header',
+      'femmes-btn':'femmes-btn','educ-header-title':'educ-header','educ-btn':'educ-btn'
+    };
+    for (const [elId, key] of Object.entries(ids)) {
+      const el = document.getElementById(elId);
+      if (el && tr[key]) el.textContent = tr[key];
+    }
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (tr[key]) el.textContent = tr[key];
+    });
+    document.querySelectorAll('.lang-display').forEach(d => {
+      d.classList.toggle('active', d.dataset.forLang === lang);
+    });
+  }
+
+  function goTo(n) {
+    const allPages = document.querySelectorAll('.page');
+    allPages[currentPage].classList.remove('active');
+    allPages[currentPage].classList.add('exit');
+    setTimeout(() => allPages[currentPage].classList.remove('exit'), 350);
+    currentPage = n;
+    allPages[currentPage].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===n));
+    const sd = sideData[n];
+    document.getElementById('side-label').textContent = sd.label;
+    document.getElementById('side-title').innerHTML = sd.title;
+    document.getElementById('side-desc').textContent = sd.desc;
+  }
+
+  function nextPage() { if (currentPage < pages.length-1) goTo(currentPage+1); }
+  function prevPage() { if (currentPage > 0) goTo(currentPage-1); }
+
+  function selectLang(el, lang) {
+    document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    currentLang = lang;
+    applyTranslations(lang);
+  }
+
+  function animateFemmes(card) {
+    card.classList.add('ripple-anim');
+    card.addEventListener('animationend', () => { card.classList.remove('ripple-anim'); goTo(4); }, { once: true });
+  }
+  function animateEduc(card) {
+    card.classList.add('ripple-anim');
+    card.addEventListener('animationend', () => { card.classList.remove('ripple-anim'); goTo(5); }, { once: true });
+  }
+</script>
+</body>
+</html>
