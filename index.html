@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alsace Maraude – Demo App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:#1a0a0a;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0;overflow-x:hidden}
+
+  /* NAV */
+  .site-nav{width:100%;background:#0f0505;border-bottom:1px solid #3a1010;padding:10px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .nav-brand{display:flex;align-items:center;gap:12px}
+  .nav-logo-wrap{width:44px;height:44px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+  .nav-brand-text{display:flex;flex-direction:column;line-height:1.1}
+  .brand-main{font-family:'Playfair Display',serif;font-size:18px;color:#fff;letter-spacing:.5px}
+  .brand-sub{font-size:10px;color:#c8312a;letter-spacing:1.5px;text-transform:uppercase;font-weight:600}
+  .nav-links{display:flex;gap:28px}
+  .nav-links a{color:#bbb;text-decoration:none;font-size:14px;transition:color .2s}
+  .nav-links a:hover{color:#fff}
+
+  /* HERO */
+  .hero{width:100%;padding:80px 40px 60px;text-align:center;background:linear-gradient(180deg,#0f0505 0%,#1a0a0a 100%)}
+  .hero-tag{display:inline-block;background:#2a0808;color:#c8312a;border:1px solid #4a1515;border-radius:20px;font-size:12px;font-weight:600;padding:5px 14px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);color:#fff;line-height:1.15;margin-bottom:20px}
+  .hero h1 em{color:#c8312a;font-style:normal}
+  .hero p{color:#999;font-size:17px;max-width:520px;margin:0 auto 40px;line-height:1.7}
+  .hero-cta{background:#c8312a;color:#fff;font-weight:600;font-size:15px;padding:14px 32px;border-radius:8px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:background .2s}
+  .hero-cta:hover{background:#e03a32}
+
+  /* PHONE SECTION */
+  .phone-section{width:100%;max-width:1200px;padding:60px 40px 80px;display:flex;align-items:flex-start;justify-content:center;gap:60px}
+  .phone-wrapper{position:relative;flex-shrink:0}
+  .phone-frame{width:320px;height:640px;background:#111;border-radius:44px;border:3px solid #333;position:relative;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08)}
+  .phone-frame::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 20px 20px;z-index:10}
+  .phone-screen{width:100%;height:100%;overflow:hidden;border-radius:41px;position:relative;background:#fff}
+
+  /* PAGES */
+  .page{position:absolute;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease;transform:translateX(30px)}
+  .page.active{opacity:1;pointer-events:all;transform:translateX(0)}
+  .page.exit{opacity:0;transform:translateX(-30px)}
+
+  /* HEADER */
+  .app-header{background:#c8312a;padding:36px 16px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .header-title{color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px}
+  .header-logo{width:38px;height:38px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+  .logo-svg{width:32px;height:32px}
+  .back-btn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:'DM Sans',sans-serif}
+  .back-btn:hover{background:rgba(255,255,255,.28)}
+
+  /* LANGUE PAGE */
+  .langue-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 20px 24px;background:#fafafa}
+  .langue-logo-block{display:flex;flex-direction:column;align-items:center;margin-bottom:18px}
+  .langue-asso-name{font-size:14px;font-weight:800;color:#111;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .langue-logo-circle{width:76px;height:76px;background:#fff;border-radius:50%;border:2px solid #e8e8e8;display:flex;align-items:center;justify-content:center}
+  .lang-title-text{font-size:14px;font-weight:600;color:#444;margin-bottom:14px;text-align:center}
+  .lang-option{width:100%;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:9px;transition:border-color .2s,background .15s}
+  .lang-option:hover{border-color:#c8312a;background:#fff8f8}
+  .lang-flag{font-size:24px;line-height:1}
+  .lang-name{font-weight:600;font-size:13px;color:#222}
+  .lang-native{font-size:10px;color:#888}
+  .lang-check{margin-left:auto;width:20px;height:20px;border:2px solid #ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+  .lang-option.selected .lang-check{background:#c8312a;border-color:#c8312a}
+  .lang-option.selected .lang-check::after{content:'';width:7px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block}
+  .lang-option.selected{border-color:#c8312a;background:#fff8f8}
+
+  /* LOGIN */
+  .login-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;background:#fafafa}
+  .login-icon{width:56px;height:56px;background:#fde8e8;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:26px}
+  .login-title{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:20px;text-align:center}
+  .input-group{width:100%;margin-bottom:12px}
+  .input-label{font-size:10px;font-weight:600;color:#666;margin-bottom:4px;display:block;letter-spacing:.5px;text-transform:uppercase}
+  .app-input{width:100%;padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;color:#222;background:#fff;transition:border-color .2s;outline:none}
+  .app-input:focus{border-color:#c8312a}
+  .app-input::placeholder{color:#bbb}
+  .btn-login{width:100%;background:#c8312a;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:6px;transition:background .2s}
+  .btn-login:hover{background:#e03a32}
+  .forgot-link{font-size:11px;color:#c8312a;text-align:center;margin-top:10px;cursor:pointer}
+  .lang-display{display:none;width:100%}
+  .lang-display.active{display:block}
+
+  /* HOME */
+  .home-body{flex:1;overflow-y:auto;background:#f5f5f5;padding:14px}
+  .welcome-banner{background:linear-gradient(135deg,#c8312a,#8b1a16);border-radius:14px;padding:16px;margin-bottom:14px;color:#fff}
+  .wb-label{font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+  .wb-name{font-size:18px;font-weight:700}
+  .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .home-card{background:#fff;border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1.5px solid #eee}
+  .home-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+  .home-card.clickable:hover{border-color:#c8312a}
+  .home-card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px}
+  .home-card-label{font-size:11px;font-weight:600;color:#333;line-height:1.3}
+
+  /* BESOINS */
+  .besoins-body{flex:1;overflow-y:auto;background:#f5f5f5;padding:12px}
+  .besoins-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .besoin-card{background:#fff;border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .2s,border-color .2s;border:1.5px solid #eee}
+  .besoin-card:hover{border-color:#c8312a;box-shadow:0 4px 16px rgba(200,49,42,.13)}
+  .besoin-card.highlight{border-color:#c8312a;background:#fff8f8}
+  .besoin-card.ripple-anim{animation:ripplePulse .4s ease}
+  @keyframes ripplePulse{0%{transform:scale(1)}40%{transform:scale(.93)}70%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .besoin-icon{font-size:26px;margin-bottom:6px}
+  .besoin-label{font-size:10px;font-weight:600;color:#333;line-height:1.3}
+
+  /* SUBPAGE BODY */
+  .page-body{flex:1;overflow-y:auto;background:#f5f5f5;padding:12px}
+  .items-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .item-card{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid #eee;cursor:pointer;transition:transform .15s,border-color .2s}
+  .item-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1);border-color:#c8312a}
+  .item-card.selected-item{border-color:#c8312a;background:#fff8f8}
+  .item-img{width:100%;height:76px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f8f0f0}
+  .item-info{padding:8px 10px 10px}
+  .item-name{font-size:11px;font-weight:600;color:#222;margin-bottom:2px}
+  .item-avail{font-size:10px;color:#2a9e5a;font-weight:600;display:flex;align-items:center;gap:3px}
+  .item-avail::before{content:'●';font-size:7px}
+
+  /* SIZE PICKER */
+  .size-picker{background:#fff;border-radius:12px;padding:14px;margin-top:12px;border:1.5px solid #eee;display:none}
+  .size-picker.visible{display:block}
+  .size-picker-title{font-size:12px;font-weight:700;color:#222;margin-bottom:10px}
+  .size-grid{display:flex;flex-wrap:wrap;gap:7px}
+  .size-chip{background:#f5f5f5;border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;color:#444;cursor:pointer;transition:all .15s}
+  .size-chip:hover{border-color:#c8312a;color:#c8312a}
+  .size-chip.selected{background:#c8312a;border-color:#c8312a;color:#fff}
+
+  .btn-request{width:100%;background:#c8312a;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px;transition:background .2s}
+  .btn-request:hover{background:#e03a32}
+
+  /* SIDE INFO */
+  .side-info{flex:1;max-width:400px;padding-top:20px}
+  .side-info h2{font-family:'Playfair Display',serif;font-size:28px;color:#fff;margin-bottom:16px;line-height:1.3}
+  .side-info h2 em{color:#c8312a;font-style:normal}
+  .side-info p{color:#aaa;font-size:15px;line-height:1.7;margin-bottom:24px}
+  .page-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#c8312a;margin-bottom:8px}
+  .page-dots{display:flex;gap:7px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+  .dot{width:8px;height:8px;border-radius:50%;background:#444;cursor:pointer;transition:all .2s}
+  .dot.active{background:#c8312a;width:20px;border-radius:4px}
+  .page-nav-btns{display:flex;gap:10px}
+  .nav-btn{background:#2a0808;border:1px solid #4a1515;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s}
+  .nav-btn:hover{background:#3a1010}
+  .nav-btn.primary{background:#c8312a;border-color:#c8312a}
+  .nav-btn.primary:hover{background:#e03a32}
+
+  .page-body::-webkit-scrollbar{width:3px}
+  .page-body::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}
+
+  @media(max-width:768px){
+    .phone-section{flex-direction:column;align-items:center;padding:30px 20px}
+    .nav-links{display:none}
+    .hero{padding:50px 20px 40px}
+    .site-nav{padding:10px 20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGO SVG TEMPLATE (hidden) -->
+<svg style="display:none"><symbol id="compass" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="28" stroke="#c8312a" stroke-width="2.5"/><circle cx="30" cy="30" r="20" stroke="#c8312a" stroke-width="1.5" stroke-dasharray="3 2"/><polygon points="30,8 34,30 30,28 26,30" fill="#c8312a"/><polygon points="30,52 26,30 30,32 34,30" fill="#8b1a16"/><polygon points="8,30 30,26 28,30 30,34" fill="#8b1a16"/><polygon points="52,30 30,34 32,30 30,26" fill="#c8312a"/><circle cx="30" cy="30" r="4" fill="#c8312a"/><circle cx="30" cy="30" r="2" fill="#fff"/></symbol></svg>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-brand">
+    <div class="nav-logo-wrap"><svg width="40" height="40"><use href="#compass"/></svg></div>
+    <div class="nav-brand-text">
+      <span class="brand-main">Maraude Connect</span>
+      <span class="brand-sub">Alsace Maraude · Aide aux sans-abris</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#">Accueil</a><a href="#">Fonctionnalités</a><a href="#">Contact</a><a href="#">WordPress</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Application Mobile · Demo</div>
+  <h1>Alsace Maraude<br><em>Aide aux sans-abris</em></h1>
+  <p>Une application solidaire qui connecte les bénévoles et les personnes dans le besoin. Plus de solidarité, moins de précarité.</p>
+  <button class="hero-cta" onclick="document.querySelector('.phone-section').scrollIntoView({behavior:'smooth'})">Voir la démo ↓</button>
+</section>
+
+<!-- PHONE + SIDE -->
+<section class="phone-section">
+  <div class="side-info">
+    <div class="page-label" id="side-label">Page 1 — Choix de langue</div>
+    <h2 id="side-title">Choisissez votre <em>langue</em></h2>
+    <p id="side-desc">L'application s'adapte automatiquement à la langue choisie.</p>
+    <div class="page-dots" id="dots-container"></div>
+    <div class="page-nav-btns">
+      <button class="nav-btn" onclick="prevPage()">← Préc.</button>
+      <button class="nav-btn primary" onclick="nextPage()">Suivant →</button>
+    </div>
+  </div>
+
+  <div class="phone-wrapper">
+    <div class="phone-frame">
+      <div class="phone-screen">
+
+        <!-- P0: LANGUE -->
+        <div class="page active" id="page-0">
+          <div class="app-header">
+            <span class="header-title">Maraude Connect</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="langue-body">
+            <div class="langue-logo-block">
+              <div class="langue-asso-name">Alsace Maraude</div>
+              <div class="langue-logo-circle"><svg width="68" height="68"><use href="#compass"/></svg></div>
+            </div>
+            <p class="lang-title-text">Choisir sa langue</p>
+            <div class="lang-option selected" onclick="selectLang(this,'fr');goTo(1)">
+              <span class="lang-flag">🇫🇷</span><div><div class="lang-name">Français</div><div class="lang-native">French</div></div><div class="lang-check"></div>
+            </div>
+            <div class="lang-option" onclick="selectLang(this,'de');goTo(1)">
+              <span class="lang-flag">🇩🇪</span><div><div class="lang-name">Deutsch</div><div class="lang-native">German</div></div><div class="lang-check"></div>
+            </div>
+            <div class="lang-option" onclick="selectLang(this,'en');goTo(1)">
+              <span class="lang-flag">🇬🇧</span><div><div class="lang-name">English</div><div class="lang-native">Anglais</div></div><div class="lang-check"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P1: LOGIN -->
+        <div class="page" id="page-1">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(0)">←</button>
+            <span class="header-title" id="t-login-header">Identification</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="login-body">
+            <div class="login-icon">🔐</div>
+            <div class="lang-display active" data-for-lang="fr">
+              <p class="login-title">Veuillez vous identifier</p>
+              <div class="input-group"><label class="input-label">Identifiant</label><input class="app-input" type="text" placeholder="Votre identifiant"></div>
+              <div class="input-group"><label class="input-label">Mot de passe</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Se connecter</button>
+              <div class="forgot-link">Mot de passe oublié ?</div>
+            </div>
+            <div class="lang-display" data-for-lang="de">
+              <p class="login-title">Bitte identifizieren Sie sich</p>
+              <div class="input-group"><label class="input-label">Benutzername</label><input class="app-input" type="text" placeholder="Ihr Benutzername"></div>
+              <div class="input-group"><label class="input-label">Passwort</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Anmelden</button>
+              <div class="forgot-link">Passwort vergessen?</div>
+            </div>
+            <div class="lang-display" data-for-lang="en">
+              <p class="login-title">Please sign in</p>
+              <div class="input-group"><label class="input-label">Username</label><input class="app-input" type="text" placeholder="Your username"></div>
+              <div class="input-group"><label class="input-label">Password</label><input class="app-input" type="password" placeholder="••••••••"></div>
+              <button class="btn-login" onclick="goTo(2)">Sign in</button>
+              <div class="forgot-link">Forgot password?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P2: HOME -->
+        <div class="page" id="page-2">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(1)">←</button>
+            <span class="header-title" id="t-home-header">Bienvenue</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="home-body">
+            <div class="welcome-banner">
+              <div class="wb-label">Alsace Maraude</div>
+              <div class="wb-name" id="t-greeting">Bonjour 👋</div>
+              <div style="font-size:11px;opacity:.75;margin-top:3px" id="t-sub">Que souhaitez-vous faire ?</div>
+            </div>
+            <div class="home-grid">
+              <div class="home-card clickable" onclick="goTo(3)"><div class="home-card-icon" style="background:#fde8e8">🙏</div><div class="home-card-label" id="t-hc-besoins">Mes besoins</div></div>
+              <div class="home-card"><div class="home-card-icon" style="background:#e8f0fd">ℹ️</div><div class="home-card-label" id="t-hc-infos">Infos utiles</div></div>
+              <div class="home-card"><div class="home-card-icon" style="background:#e8fde8">📞</div><div class="home-card-label" id="t-hc-contact">Nous contacter</div></div>
+              <div class="home-card"><div class="home-card-icon" style="background:#fdfde8">💬</div><div class="home-card-label" id="t-hc-msg">Messagerie</div></div>
+              <div class="home-card" style="grid-column:1/-1"><div class="home-card-icon" style="background:#fde8f5">📦</div><div class="home-card-label" id="t-hc-box">Ouvrir mon box</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P3: MES BESOINS -->
+        <div class="page" id="page-3">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(2)">←</button>
+            <span class="header-title" id="t-besoins-header">Mes besoins</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="besoins-body">
+            <div class="besoins-grid">
+              <div class="besoin-card highlight" onclick="animateCard(this,4)"><div class="besoin-icon">👔</div><div class="besoin-label" data-i18n="b-hommes">Vêtements hommes</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,5)"><div class="besoin-icon">👗</div><div class="besoin-label" data-i18n="b-femmes">Vêtements femmes</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,6)"><div class="besoin-icon">🧒</div><div class="besoin-label" data-i18n="b-enfants">Vêtements enfants</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,7)"><div class="besoin-icon">🍎</div><div class="besoin-label" data-i18n="b-aliment">Alimentation</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,8)"><div class="besoin-icon">🧹</div><div class="besoin-label" data-i18n="b-menagers">Produits ménagers</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,9)"><div class="besoin-icon">🚿</div><div class="besoin-label" data-i18n="b-hygiene">Hygiène</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,10)"><div class="besoin-icon">📚</div><div class="besoin-label" data-i18n="b-educ">Éducation / Culture</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,11)"><div class="besoin-icon">🐾</div><div class="besoin-label" data-i18n="b-animal">Animal de compagnie</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,12)"><div class="besoin-icon">🩹</div><div class="besoin-label" data-i18n="b-soin">Trousse de soin</div></div>
+              <div class="besoin-card highlight" onclick="animateCard(this,13)"><div class="besoin-icon">🛏️</div><div class="besoin-label" data-i18n="b-couvertures">Couvertures</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P4: VETEMENTS HOMMES -->
+        <div class="page" id="page-4">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p4-header">Vêtements hommes</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid" id="grid-p4">
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">🩲</div><div class="item-info"><div class="item-name" data-i18n="h-sous">Sous-vêtements</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">👕</div><div class="item-info"><div class="item-name" data-i18n="h-tshirt">Tee-shirt</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">🧶</div><div class="item-info"><div class="item-name" data-i18n="h-pull">Pull</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">🧦</div><div class="item-info"><div class="item-name" data-i18n="h-chaussettes">Chaussettes</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">🌙</div><div class="item-info"><div class="item-name" data-i18n="h-pyjama">Pyjama</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">👞</div><div class="item-info"><div class="item-name" data-i18n="h-chaussures">Chaussures</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">🧥</div><div class="item-info"><div class="item-name" data-i18n="h-blouson">Blouson / Manteau</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p4')"><div class="item-img">👖</div><div class="item-info"><div class="item-name" data-i18n="h-pantalon">Pantalon</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1" onclick="selectItem(this,'p4')"><div class="item-img">👔</div><div class="item-info"><div class="item-name" data-i18n="h-chemise">Chemise</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <div class="size-picker" id="size-picker-p4">
+              <div class="size-picker-title" id="t-size-p4">Choisir votre taille</div>
+              <div class="size-grid">
+                <div class="size-chip" onclick="selectSize(this)">XS</div><div class="size-chip" onclick="selectSize(this)">S</div><div class="size-chip" onclick="selectSize(this)">M</div><div class="size-chip" onclick="selectSize(this)">L</div><div class="size-chip" onclick="selectSize(this)">XL</div><div class="size-chip" onclick="selectSize(this)">XXL</div><div class="size-chip" onclick="selectSize(this)">3XL</div>
+              </div>
+            </div>
+            <button class="btn-request" id="t-btn-p4">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P5: VETEMENTS FEMMES -->
+        <div class="page" id="page-5">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p5-header">Vêtements femmes</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid" id="grid-p5">
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">🩲</div><div class="item-info"><div class="item-name" data-i18n="f-sous">Sous-vêtements</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">👕</div><div class="item-info"><div class="item-name" data-i18n="f-tshirt">Tee-shirt</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">🧶</div><div class="item-info"><div class="item-name" data-i18n="f-pull">Pull</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">🧦</div><div class="item-info"><div class="item-name" data-i18n="f-chaussettes">Chaussettes</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">🌙</div><div class="item-info"><div class="item-name" data-i18n="f-pyjama">Pyjama</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">👠</div><div class="item-info"><div class="item-name" data-i18n="f-chaussures">Chaussures</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">🧥</div><div class="item-info"><div class="item-name" data-i18n="f-blouson">Blouson / Manteau</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" onclick="selectItem(this,'p5')"><div class="item-img">👖</div><div class="item-info"><div class="item-name" data-i18n="f-pantalon">Pantalon</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1" onclick="selectItem(this,'p5')"><div class="item-img">👗</div><div class="item-info"><div class="item-name" data-i18n="f-robe">Robe / Jupe</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <div class="size-picker" id="size-picker-p5">
+              <div class="size-picker-title" id="t-size-p5">Choisir votre taille</div>
+              <div class="size-grid">
+                <div class="size-chip" onclick="selectSize(this)">XXS</div><div class="size-chip" onclick="selectSize(this)">XS</div><div class="size-chip" onclick="selectSize(this)">S</div><div class="size-chip" onclick="selectSize(this)">M</div><div class="size-chip" onclick="selectSize(this)">L</div><div class="size-chip" onclick="selectSize(this)">XL</div><div class="size-chip" onclick="selectSize(this)">XXL</div><div class="size-chip" onclick="selectSize(this)">3XL</div>
+              </div>
+            </div>
+            <button class="btn-request" id="t-btn-p5">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P6: VETEMENTS ENFANTS -->
+        <div class="page" id="page-6">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p6-header">Vêtements enfants</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">👶</div><div class="item-info"><div class="item-name" data-i18n="e-bebe">Vêtements bébé</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">👕</div><div class="item-info"><div class="item-name" data-i18n="e-tshirt">Tee-shirt</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">👖</div><div class="item-info"><div class="item-name" data-i18n="e-pantalon">Pantalon</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧥</div><div class="item-info"><div class="item-name" data-i18n="e-manteau">Manteau</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🩴</div><div class="item-info"><div class="item-name" data-i18n="e-chaussures">Chaussures</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧦</div><div class="item-info"><div class="item-name" data-i18n="e-chaussettes">Chaussettes</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🌙</div><div class="item-info"><div class="item-name" data-i18n="e-pyjama">Pyjama</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🩲</div><div class="item-info"><div class="item-name" data-i18n="e-sous">Sous-vêtements</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p6">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P7: ALIMENTATION -->
+        <div class="page" id="page-7">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p7-header">Alimentation</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">🍎</div><div class="item-info"><div class="item-name" data-i18n="al-fruits">Fruits & légumes</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🥫</div><div class="item-info"><div class="item-name" data-i18n="al-conserves">Conserves</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🍞</div><div class="item-info"><div class="item-name" data-i18n="al-pain">Pain & céréales</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🥛</div><div class="item-info"><div class="item-name" data-i18n="al-lait">Produits laitiers</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🍗</div><div class="item-info"><div class="item-name" data-i18n="al-viande">Viande / Poisson</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧃</div><div class="item-info"><div class="item-name" data-i18n="al-boisson">Boissons</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🍫</div><div class="item-info"><div class="item-name" data-i18n="al-snack">Snacks</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">👶</div><div class="item-info"><div class="item-name" data-i18n="al-bebe">Alimentation bébé</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p7">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P8: PRODUITS MENAGERS -->
+        <div class="page" id="page-8">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p8-header">Produits ménagers</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">🧴</div><div class="item-info"><div class="item-name" data-i18n="m-detergent">Lessive</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧹</div><div class="item-info"><div class="item-name" data-i18n="m-balai">Balai / Serpillère</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🫧</div><div class="item-info"><div class="item-name" data-i18n="m-vaisselle">Produit vaisselle</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧻</div><div class="item-info"><div class="item-name" data-i18n="m-papier">Papier toilette</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🗑️</div><div class="item-info"><div class="item-name" data-i18n="m-poubelle">Sacs poubelle</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧽</div><div class="item-info"><div class="item-name" data-i18n="m-eponge">Éponges</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p8">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P9: HYGIENE -->
+        <div class="page" id="page-9">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p9-header">Hygiène</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">🪥</div><div class="item-info"><div class="item-name" data-i18n="hy-brosse">Brosse à dents</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧴</div><div class="item-info"><div class="item-name" data-i18n="hy-shampoing">Shampooing</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧼</div><div class="item-info"><div class="item-name" data-i18n="hy-savon">Savon</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🪒</div><div class="item-info"><div class="item-name" data-i18n="hy-rasoir">Rasoir</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🩸</div><div class="item-info"><div class="item-name" data-i18n="hy-protection">Protections féminines</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧻</div><div class="item-info"><div class="item-name" data-i18n="hy-papier">Papier hygiénique</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">💊</div><div class="item-info"><div class="item-name" data-i18n="hy-dentifrice">Dentifrice</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧖</div><div class="item-info"><div class="item-name" data-i18n="hy-deodorant">Déodorant</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p9">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P10: EDUCATION / CULTURE -->
+        <div class="page" id="page-10">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p10-header">Éducation / Culture</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">📚</div><div class="item-info"><div class="item-name" data-i18n="ed-livres">Livres / BD</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">✏️</div><div class="item-info"><div class="item-name" data-i18n="ed-scolaire">Affaires scolaires</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">🎲</div><div class="item-info"><div class="item-name" data-i18n="ed-jeux">Jeux de société</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p10">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P11: ANIMAL DE COMPAGNIE -->
+        <div class="page" id="page-11">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p11-header">Animaux de compagnie</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">🐱</div><div class="item-info"><div class="item-name" data-i18n="an-chat">Croquettes pour chats</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">🐶</div><div class="item-info"><div class="item-name" data-i18n="an-chien">Croquettes pour chiens</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p11">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P12: TROUSSE DE SOIN -->
+        <div class="page" id="page-12">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p12-header">Trousse de soin</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card"><div class="item-img">🩹</div><div class="item-info"><div class="item-name" data-i18n="ts-pansements">Pansements</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">💊</div><div class="item-info"><div class="item-name" data-i18n="ts-medicaments">Médicaments</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🌡️</div><div class="item-info"><div class="item-name" data-i18n="ts-thermometre">Thermomètre</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🧴</div><div class="item-info"><div class="item-name" data-i18n="ts-antiseptique">Antiseptique</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">🩻</div><div class="item-info"><div class="item-name" data-i18n="ts-bande">Bandes / Compresses</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card"><div class="item-img">💉</div><div class="item-info"><div class="item-name" data-i18n="ts-seringue">Seringues</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p12">Faire une demande</button>
+          </div>
+        </div>
+
+        <!-- P13: COUVERTURES -->
+        <div class="page" id="page-13">
+          <div class="app-header">
+            <button class="back-btn" onclick="goTo(3)">←</button>
+            <span class="header-title" id="t-p13-header">Couvertures</span>
+            <div class="header-logo"><svg class="logo-svg"><use href="#compass"/></svg></div>
+          </div>
+          <div class="page-body">
+            <div class="items-grid">
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">🛏️</div><div class="item-info"><div class="item-name" data-i18n="co-couverture">Couverture chaude</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">🪱</div><div class="item-info"><div class="item-name" data-i18n="co-sac">Sac de couchage</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+              <div class="item-card" style="grid-column:1/-1"><div class="item-img" style="height:90px;font-size:44px">😴</div><div class="item-info"><div class="item-name" data-i18n="co-oreiller">Oreiller</div><div class="item-avail" data-i18n="avail">Disponible</div></div></div>
+            </div>
+            <button class="btn-request" id="t-btn-p13">Faire une demande</button>
+          </div>
+        </div>
+
+      </div><!-- phone-screen -->
+    </div><!-- phone-frame -->
+  </div><!-- phone-wrapper -->
+</section>
+
+<script>
+const TOTAL_PAGES = 14;
+let currentPage = 0;
+let currentLang = 'fr';
+
+// Build dots
+const dotsContainer = document.getElementById('dots-container');
+for (let i = 0; i < TOTAL_PAGES; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsContainer.appendChild(d);
+}
+
+const sideData = [
+  { label:'Page 1 — Choix de langue',        title:'Choisissez votre <em>langue</em>',     desc:"L'application s'adapte automatiquement à la langue choisie pour chaque utilisateur." },
+  { label:'Page 2 — Connexion',               title:'Identifiez-<em>vous</em>',             desc:"Connexion sécurisée. L'interface est traduite selon la langue sélectionnée." },
+  { label:'Page 3 — Accueil',                 title:'Menu <em>principal</em>',              desc:"Accès rapide à toutes les fonctionnalités : besoins, infos, messagerie, box personnel." },
+  { label:'Page 4 — Mes besoins',             title:'Toutes les <em>catégories</em>',       desc:"Toutes les catégories sont navigables. Cliquez sur n'importe laquelle pour l'explorer." },
+  { label:'Page 5 — Vêtements hommes',        title:'Vêtements <em>hommes</em>',            desc:"Sélectionnez un article pour choisir votre taille." },
+  { label:'Page 6 — Vêtements femmes',        title:'Vêtements <em>femmes</em>',            desc:"Sélectionnez un article pour choisir votre taille." },
+  { label:'Page 7 — Vêtements enfants',       title:'Vêtements <em>enfants</em>',           desc:"Du vêtement bébé jusqu'aux articles pour grands enfants." },
+  { label:'Page 8 — Alimentation',            title:'Alimentation & <em>nutrition</em>',    desc:"Fruits, conserves, produits laitiers, boissons et plus." },
+  { label:'Page 9 — Produits ménagers',       title:'Produits <em>ménagers</em>',           desc:"Lessive, produits d'entretien et accessoires pour le quotidien." },
+  { label:'Page 10 — Hygiène',                title:'Hygiène & <em>soins</em>',             desc:"Savon, shampooing, rasoir, protections féminines et plus." },
+  { label:'Page 11 — Éducation / Culture',    title:'Culture & <em>savoirs</em>',           desc:"Livres, BD, affaires scolaires et jeux de société." },
+  { label:'Page 12 — Animaux de compagnie',   title:'Nos <em>amis</em> les animaux',        desc:"Croquettes pour chats et chiens disponibles." },
+  { label:'Page 13 — Trousse de soin',        title:'Trousse de <em>soin</em>',             desc:"Pansements, médicaments, antiseptiques et matériel de premiers secours." },
+  { label:'Page 14 — Couvertures',            title:'Couvertures & <em>literie</em>',       desc:"Couvertures chaudes, sacs de couchage et oreillers." },
+];
+
+// ─── TRANSLATIONS ────────────────────────────────────────────────────────────
+const TR = {
+  fr: {
+    'login-header':'Identification','home-header':'Bienvenue','greeting':'Bonjour 👋','sub':'Que souhaitez-vous faire ?',
+    'hc-besoins':'Mes besoins','hc-infos':'Infos utiles','hc-contact':'Nous contacter','hc-msg':'Messagerie','hc-box':'Ouvrir mon box',
+    'besoins-header':'Mes besoins',
+    'b-hommes':'Vêtements hommes','b-femmes':'Vêtements femmes','b-enfants':'Vêtements enfants',
+    'b-aliment':'Alimentation','b-menagers':'Produits ménagers','b-hygiene':'Hygiène',
+    'b-educ':'Éducation / Culture','b-animal':'Animal de compagnie','b-soin':'Trousse de soin','b-couvertures':'Couvertures',
+    'p4-header':'Vêtements hommes','h-sous':'Sous-vêtements','h-tshirt':'Tee-shirt','h-pull':'Pull','h-chaussettes':'Chaussettes','h-pyjama':'Pyjama','h-chaussures':'Chaussures','h-blouson':'Blouson / Manteau','h-pantalon':'Pantalon','h-chemise':'Chemise','size-p4':'Choisir votre taille','btn-p4':'Faire une demande',
+    'p5-header':'Vêtements femmes','f-sous':'Sous-vêtements','f-tshirt':'Tee-shirt','f-pull':'Pull','f-chaussettes':'Chaussettes','f-pyjama':'Pyjama','f-chaussures':'Chaussures','f-blouson':'Blouson / Manteau','f-pantalon':'Pantalon','f-robe':'Robe / Jupe','size-p5':'Choisir votre taille','btn-p5':'Faire une demande',
+    'p6-header':'Vêtements enfants','e-bebe':'Vêtements bébé','e-tshirt':'Tee-shirt','e-pantalon':'Pantalon','e-manteau':'Manteau','e-chaussures':'Chaussures','e-chaussettes':'Chaussettes','e-pyjama':'Pyjama','e-sous':'Sous-vêtements','btn-p6':'Faire une demande',
+    'p7-header':'Alimentation','al-fruits':'Fruits & légumes','al-conserves':'Conserves','al-pain':'Pain & céréales','al-lait':'Produits laitiers','al-viande':'Viande / Poisson','al-boisson':'Boissons','al-snack':'Snacks','al-bebe':'Alimentation bébé','btn-p7':'Faire une demande',
+    'p8-header':'Produits ménagers','m-detergent':'Lessive','m-balai':'Balai / Serpillère','m-vaisselle':'Produit vaisselle','m-papier':'Papier toilette','m-poubelle':'Sacs poubelle','m-eponge':'Éponges','btn-p8':'Faire une demande',
+    'p9-header':'Hygiène','hy-brosse':'Brosse à dents','hy-shampoing':'Shampooing','hy-savon':'Savon','hy-rasoir':'Rasoir','hy-protection':'Protections féminines','hy-papier':'Papier hygiénique','hy-dentifrice':'Dentifrice','hy-deodorant':'Déodorant','btn-p9':'Faire une demande',
+    'p10-header':'Éducation / Culture','ed-livres':'Livres / BD','ed-scolaire':'Affaires scolaires','ed-jeux':'Jeux de société','btn-p10':'Faire une demande',
+    'p11-header':'Animaux de compagnie','an-chat':'Croquettes pour chats','an-chien':'Croquettes pour chiens','btn-p11':'Faire une demande',
+    'p12-header':'Trousse de soin','ts-pansements':'Pansements','ts-medicaments':'Médicaments','ts-thermometre':'Thermomètre','ts-antiseptique':'Antiseptique','ts-bande':'Bandes / Compresses','ts-seringue':'Seringues','btn-p12':'Faire une demande',
+    'p13-header':'Couvertures','co-couverture':'Couverture chaude','co-sac':'Sac de couchage','co-oreiller':'Oreiller','btn-p13':'Faire une demande',
+    'avail':'Disponible',
+  },
+  de: {
+    'login-header':'Anmeldung','home-header':'Willkommen','greeting':'Hallo 👋','sub':'Was möchten Sie tun?',
+    'hc-besoins':'Mein Bedarf','hc-infos':'Nützliche Infos','hc-contact':'Kontakt','hc-msg':'Nachrichten','hc-box':'Mein Box öffnen',
+    'besoins-header':'Mein Bedarf',
+    'b-hommes':'Herrenkleidung','b-femmes':'Damenkleidung','b-enfants':'Kinderkleidung',
+    'b-aliment':'Lebensmittel','b-menagers':'Haushaltsprodukte','b-hygiene':'Hygiene',
+    'b-educ':'Bildung / Kultur','b-animal':'Haustier','b-soin':'Erste-Hilfe-Set','b-couvertures':'Decken',
+    'p4-header':'Herrenkleidung','h-sous':'Unterwäsche','h-tshirt':'T-Shirt','h-pull':'Pullover','h-chaussettes':'Socken','h-pyjama':'Schlafanzug','h-chaussures':'Schuhe','h-blouson':'Jacke / Mantel','h-pantalon':'Hose','h-chemise':'Hemd','size-p4':'Größe wählen','btn-p4':'Anfrage stellen',
+    'p5-header':'Damenkleidung','f-sous':'Unterwäsche','f-tshirt':'T-Shirt','f-pull':'Pullover','f-chaussettes':'Socken','f-pyjama':'Schlafanzug','f-chaussures':'Schuhe','f-blouson':'Jacke / Mantel','f-pantalon':'Hose','f-robe':'Kleid / Rock','size-p5':'Größe wählen','btn-p5':'Anfrage stellen',
+    'p6-header':'Kinderkleidung','e-bebe':'Babykleidung','e-tshirt':'T-Shirt','e-pantalon':'Hose','e-manteau':'Mantel','e-chaussures':'Schuhe','e-chaussettes':'Socken','e-pyjama':'Schlafanzug','e-sous':'Unterwäsche','btn-p6':'Anfrage stellen',
+    'p7-header':'Lebensmittel','al-fruits':'Obst & Gemüse','al-conserves':'Konserven','al-pain':'Brot & Getreide','al-lait':'Milchprodukte','al-viande':'Fleisch / Fisch','al-boisson':'Getränke','al-snack':'Snacks','al-bebe':'Babynahrung','btn-p7':'Anfrage stellen',
+    'p8-header':'Haushaltsprodukte','m-detergent':'Waschmittel','m-balai':'Besen / Mopp','m-vaisselle':'Spülmittel','m-papier':'Toilettenpapier','m-poubelle':'Müllbeutel','m-eponge':'Schwämme','btn-p8':'Anfrage stellen',
+    'p9-header':'Hygiene','hy-brosse':'Zahnbürste','hy-shampoing':'Shampoo','hy-savon':'Seife','hy-rasoir':'Rasierer','hy-protection':'Damenbinden','hy-papier':'Hygienepapier','hy-dentifrice':'Zahnpasta','hy-deodorant':'Deodorant','btn-p9':'Anfrage stellen',
+    'p10-header':'Bildung / Kultur','ed-livres':'Bücher / Comics','ed-scolaire':'Schulmaterial','ed-jeux':'Brettspiele','btn-p10':'Anfrage stellen',
+    'p11-header':'Haustiere','an-chat':'Katzenfutter','an-chien':'Hundefutter','btn-p11':'Anfrage stellen',
+    'p12-header':'Erste-Hilfe-Set','ts-pansements':'Pflaster','ts-medicaments':'Medikamente','ts-thermometre':'Thermometer','ts-antiseptique':'Antiseptikum','ts-bande':'Verbände / Kompressen','ts-seringue':'Spritzen','btn-p12':'Anfrage stellen',
+    'p13-header':'Decken','co-couverture':'Warme Decke','co-sac':'Schlafsack','co-oreiller':'Kissen','btn-p13':'Anfrage stellen',
+    'avail':'Verfügbar',
+  },
+  en: {
+    'login-header':'Sign In','home-header':'Welcome','greeting':'Hello 👋','sub':'What would you like to do?',
+    'hc-besoins':'My needs','hc-infos':'Useful info','hc-contact':'Contact us','hc-msg':'Messaging','hc-box':'Open my box',
+    'besoins-header':'My needs',
+    'b-hommes':"Men's clothing",'b-femmes':"Women's clothing",'b-enfants':"Children's clothing",
+    'b-aliment':'Food & nutrition','b-menagers':'Household products','b-hygiene':'Hygiene',
+    'b-educ':'Education / Culture','b-animal':'Pet supplies','b-soin':'First aid kit','b-couvertures':'Blankets',
+    "p4-header":"Men's clothing",'h-sous':'Underwear','h-tshirt':'T-shirt','h-pull':'Sweater','h-chaussettes':'Socks','h-pyjama':'Pyjamas','h-chaussures':'Shoes','h-blouson':'Jacket / Coat','h-pantalon':'Trousers','h-chemise':'Shirt','size-p4':'Choose your size','btn-p4':'Make a request',
+    "p5-header":"Women's clothing",'f-sous':'Underwear','f-tshirt':'T-shirt','f-pull':'Sweater','f-chaussettes':'Socks','f-pyjama':'Pyjamas','f-chaussures':'Shoes','f-blouson':'Jacket / Coat','f-pantalon':'Trousers','f-robe':'Dress / Skirt','size-p5':'Choose your size','btn-p5':'Make a request',
+    "p6-header":"Children's clothing",'e-bebe':'Baby clothing','e-tshirt':'T-shirt','e-pantalon':'Trousers','e-manteau':'Coat','e-chaussures':'Shoes','e-chaussettes':'Socks','e-pyjama':'Pyjamas','e-sous':'Underwear','btn-p6':'Make a request',
+    'p7-header':'Food & nutrition','al-fruits':'Fruits & vegetables','al-conserves':'Canned goods','al-pain':'Bread & cereals','al-lait':'Dairy products','al-viande':'Meat / Fish','al-boisson':'Drinks','al-snack':'Snacks','al-bebe':'Baby food','btn-p7':'Make a request',
+    'p8-header':'Household products','m-detergent':'Laundry detergent','m-balai':'Broom / Mop','m-vaisselle':'Dish soap','m-papier':'Toilet paper','m-poubelle':'Bin bags','m-eponge':'Sponges','btn-p8':'Make a request',
+    'p9-header':'Hygiene','hy-brosse':'Toothbrush','hy-shampoing':'Shampoo','hy-savon':'Soap','hy-rasoir':'Razor','hy-protection':'Sanitary protection','hy-papier':'Hygiene paper','hy-dentifrice':'Toothpaste','hy-deodorant':'Deodorant','btn-p9':'Make a request',
+    'p10-header':'Education / Culture','ed-livres':'Books / Comics','ed-scolaire':'School supplies','ed-jeux':'Board games','btn-p10':'Make a request',
+    'p11-header':'Pet supplies','an-chat':'Cat food','an-chien':'Dog food','btn-p11':'Make a request',
+    'p12-header':'First aid kit','ts-pansements':'Bandages','ts-medicaments':'Medicines','ts-thermometre':'Thermometer','ts-antiseptique':'Antiseptic','ts-bande':'Bandages / Gauze','ts-seringue':'Syringes','btn-p12':'Make a request',
+    'p13-header':'Blankets','co-couverture':'Warm blanket','co-sac':'Sleeping bag','co-oreiller':'Pillow','btn-p13':'Make a request',
+    'avail':'Available',
+  }
+};
+
+// ID→key mapping for named elements
+const ID_MAP = {
+  't-login-header':'login-header','t-home-header':'home-header','t-greeting':'greeting','t-sub':'sub',
+  't-hc-besoins':'hc-besoins','t-hc-infos':'hc-infos','t-hc-contact':'hc-contact','t-hc-msg':'hc-msg','t-hc-box':'hc-box',
+  't-besoins-header':'besoins-header',
+  't-p4-header':'p4-header','t-size-p4':'size-p4','t-btn-p4':'btn-p4',
+  't-p5-header':'p5-header','t-size-p5':'size-p5','t-btn-p5':'btn-p5',
+  't-p6-header':'p6-header','t-btn-p6':'btn-p6',
+  't-p7-header':'p7-header','t-btn-p7':'btn-p7',
+  't-p8-header':'p8-header','t-btn-p8':'btn-p8',
+  't-p9-header':'p9-header','t-btn-p9':'btn-p9',
+  't-p10-header':'p10-header','t-btn-p10':'btn-p10',
+  't-p11-header':'p11-header','t-btn-p11':'btn-p11',
+  't-p12-header':'p12-header','t-btn-p12':'btn-p12',
+  't-p13-header':'p13-header','t-btn-p13':'btn-p13',
+};
+
+function applyTranslations(lang) {
+  const tr = TR[lang];
+  for (const [id, key] of Object.entries(ID_MAP)) {
+    const el = document.getElementById(id);
+    if (el && tr[key]) el.textContent = tr[key];
+  }
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (tr[k]) el.textContent = tr[k];
+  });
+  document.querySelectorAll('.lang-display').forEach(d => {
+    d.classList.toggle('active', d.dataset.forLang === lang);
+  });
+}
+
+function goTo(n) {
+  document.querySelectorAll('.page')[currentPage].classList.remove('active');
+  document.querySelectorAll('.page')[currentPage].classList.add('exit');
+  setTimeout(() => document.querySelectorAll('.page')[currentPage]?.classList.remove('exit'), 350);
+  currentPage = n;
+  document.querySelectorAll('.page')[n].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===n));
+  const sd = sideData[n];
+  document.getElementById('side-label').textContent = sd.label;
+  document.getElementById('side-title').innerHTML = sd.title;
+  document.getElementById('side-desc').textContent = sd.desc;
+}
+
+function nextPage() { if (currentPage < TOTAL_PAGES-1) goTo(currentPage+1); }
+function prevPage() { if (currentPage > 0) goTo(currentPage-1); }
+
+function selectLang(el, lang) {
+  document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  currentLang = lang;
+  applyTranslations(lang);
+}
+
+function animateCard(card, dest) {
+  card.classList.add('ripple-anim');
+  card.addEventListener('animationend', () => { card.classList.remove('ripple-anim'); goTo(dest); }, { once: true });
+}
+
+function selectItem(card, section) {
+  card.closest('.items-grid').querySelectorAll('.item-card').forEach(c => c.classList.remove('selected-item'));
+  card.classList.add('selected-item');
+  const picker = document.getElementById('size-picker-' + section);
+  if (picker) {
+    picker.classList.add('visible');
+    picker.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+    setTimeout(() => picker.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  }
+}
+
+function selectSize(chip) {
+  if (chip.classList.contains('unavailable')) return;
+  chip.closest('.size-grid').querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+}
+</script>
+</body>
+</html>
